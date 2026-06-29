@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "description": "Superpowers workflows with planning-with-files persistent memory for Codex.",
   "author": {
-    "name": "wgz",
-    "email": "support@openai.com",
-    "url": "https://github.com/obra/superpowers"
+    "name": "xiaobaiv",
+    "url": "https://github.com/xiaobaiv"
   },
-  "homepage": "https://github.com/obra/superpowers",
-  "repository": "https://github.com/obra/superpowers",
+  "homepage": "https://github.com/xiaobaiv/superpowers-pwf-codex",
+  "repository": "https://github.com/xiaobaiv/superpowers-pwf-codex",
   "license": "MIT",
   "keywords": [
     "superpowers",
@@ -18,18 +17,19 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
   "interface": {
     "displayName": "Superpowers + PWF Memory",
     "shortDescription": "Superpowers engineering workflows backed by persistent file memory",
     "longDescription": "Use Superpowers to guide engineering workflow while planning-with-files persists active task state, findings, progress, and resume context for Codex.",
-    "developerName": "wgz",
+    "developerName": "xiaobaiv",
     "category": "Coding",
     "capabilities": [
       "Interactive",
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/obra/superpowers",
+    "websiteURL": "https://github.com/xiaobaiv/superpowers-pwf-codex",
     "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
     "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
     "defaultPrompt": [
