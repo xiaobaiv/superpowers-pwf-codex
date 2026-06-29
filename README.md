@@ -13,6 +13,8 @@ This is a Codex-only integration package. It combines Superpowers workflow skill
 
 Use this package as one integrated Codex distribution. Do not install the standalone Superpowers hooks and standalone PWF hooks at the same time.
 
+For a human-facing walkthrough, read [GUIDE.md](GUIDE.md).
+
 The `.codex-plugin/plugin.json` manifest covers skills and UI metadata. On current Codex plugin manifests, hooks are not declared there, so hook automation must be installed explicitly with the bundled `hooks/hooks-codex.json` as your single Codex hooks config.
 
 The hooks expect `hooks/` and `skills/` to share the same root. For a global Codex install, copy both into `~/.codex/`:
