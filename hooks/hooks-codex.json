@@ -1,0 +1,90 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; \"$ROOT/hooks/run-hook.cmd\" session-start-codex",
+            "async": false,
+            "statusMessage": "Loading Superpowers workflow rules"
+          },
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/session-start.sh\" 2>/dev/null || true",
+            "async": false,
+            "statusMessage": "Loading persistent planning memory"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/user-prompt-submit.sh\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/pre_tool_use.py\" 2>/dev/null || true",
+            "statusMessage": "Checking persistent plan before Bash"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/permission_request.py\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/post_tool_use.py\" 2>/dev/null || true",
+            "statusMessage": "Reviewing Bash against persistent plan"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/pre-compact.sh\" 2>/dev/null || true",
+            "statusMessage": "Preparing persistent memory before compact"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/stop.py\" 2>/dev/null || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
