@@ -17,7 +17,7 @@ Install from the repository root as a Codex marketplace:
 
 ```bash
 codex plugin marketplace add xiaobaiv/superpowers-pwf-codex --ref main
-codex plugin list --available
+codex plugin list --available --json
 codex plugin add superpowers-pwf-codex@superpowers-pwf-codex
 ```
 

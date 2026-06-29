@@ -8,7 +8,7 @@ It is not a single Codex skill. Do not install the whole repository with `skill-
 
 ```bash
 codex plugin marketplace add xiaobaiv/superpowers-pwf-codex --ref main
-codex plugin list --available
+codex plugin list --available --json
 codex plugin add superpowers-pwf-codex@superpowers-pwf-codex
 ```
 
@@ -32,6 +32,6 @@ Read the user guide:
 
 If `skill-installer` reports `SKILL.md not found`, you are using the wrong installer for this repository. Use `codex plugin marketplace add` instead.
 
-If `codex plugin list --available` does not show the plugin, confirm that `.agents/plugins/marketplace.json` exists in this repository and that your `codex plugin marketplace add` command completed successfully.
+If `codex plugin list --available --json` does not show the plugin, confirm that `.agents/plugins/marketplace.json` exists in this repository and that your `codex plugin marketplace add` command completed successfully.
 
 If hooks do not fire in your Codex environment, use the manual fallback in the plugin guide to copy `hooks/`, `skills/`, and `hooks/hooks-codex.json` into `~/.codex/`.
