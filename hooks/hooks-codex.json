@@ -6,13 +6,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; \"$ROOT/hooks/run-hook.cmd\" session-start-codex",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; \"$ROOT/hooks/run-hook.cmd\" session-start-codex",
             "async": false,
             "statusMessage": "Loading Superpowers workflow rules"
           },
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/session-start.sh\" 2>/dev/null || true",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/session-start.sh\" 2>/dev/null || true",
             "async": false,
             "statusMessage": "Loading persistent planning memory"
           }
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/user-prompt-submit.sh\" 2>/dev/null || true"
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/user-prompt-submit.sh\" 2>/dev/null || true"
           }
         ]
       }
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/pre_tool_use.py\" 2>/dev/null || true",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/pre_tool_use.py\" 2>/dev/null || true",
             "statusMessage": "Checking persistent plan before Bash"
           }
         ]
@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/permission_request.py\" 2>/dev/null || true"
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/permission_request.py\" 2>/dev/null || true"
           }
         ]
       }
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/post_tool_use.py\" 2>/dev/null || true",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/post_tool_use.py\" 2>/dev/null || true",
             "statusMessage": "Reviewing Bash against persistent plan"
           }
         ]
@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; sh \"$ROOT/hooks/pre-compact.sh\" 2>/dev/null || true",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/pre-compact.sh\" 2>/dev/null || true",
             "statusMessage": "Preparing persistent memory before compact"
           }
         ]
@@ -80,7 +80,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-/Users/wgz/skills/superpowers-pwf-codex}\"; python3 \"$ROOT/hooks/stop.py\" 2>/dev/null || true",
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/stop.py\" 2>/dev/null || true",
             "timeout": 30
           }
         ]

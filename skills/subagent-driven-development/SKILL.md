@@ -406,7 +406,7 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
+- **superpowers-pwf-memory** - In this Codex integration, persistent PWF slug-mode is the default single-tree isolation and resume mechanism. Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for the final whole-branch review
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks

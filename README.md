@@ -11,14 +11,17 @@ This is a Codex-only integration package. It combines Superpowers workflow skill
 
 ## How To Use
 
-Install this package as one Codex plugin for skills. Do not install the standalone Superpowers hooks and standalone PWF hooks at the same time.
+Use this package as one integrated Codex distribution. Do not install the standalone Superpowers hooks and standalone PWF hooks at the same time.
 
-For hook automation, use the bundled `hooks/hooks-codex.json` as your single Codex hooks config. On current Codex plugin manifests, hooks are not declared in `.codex-plugin/plugin.json`; this package keeps the hook config beside the plugin so it can be installed or copied explicitly.
+The `.codex-plugin/plugin.json` manifest covers skills and UI metadata. On current Codex plugin manifests, hooks are not declared there, so hook automation must be installed explicitly with the bundled `hooks/hooks-codex.json` as your single Codex hooks config.
+
+The hooks expect `hooks/` and `skills/` to share the same root. For a global Codex install, copy both into `~/.codex/`:
 
 ```bash
-mkdir -p ~/.codex/hooks
-cp -R /Users/wgz/skills/superpowers-pwf-codex/hooks/. ~/.codex/hooks/
-cp /Users/wgz/skills/superpowers-pwf-codex/hooks/hooks-codex.json ~/.codex/hooks.json
+mkdir -p ~/.codex/hooks ~/.codex/skills
+cp -R /path/to/superpowers-pwf-codex/hooks/. ~/.codex/hooks/
+cp -R /path/to/superpowers-pwf-codex/skills/. ~/.codex/skills/
+cp /path/to/superpowers-pwf-codex/hooks/hooks-codex.json ~/.codex/hooks.json
 ```
 
 Ensure `~/.codex/config.toml` contains:
