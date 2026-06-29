@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 import time
@@ -13,8 +12,7 @@ from typing import Any
 from resolve_active_task import load_payload, resolve, session_id_from_payload, cwd_from_payload
 
 MAX_SESSION_CHARS = 12000
-POST_TOOL_CHAR_THRESHOLD = 12000
-POST_TOOL_CALL_THRESHOLD = 12
+PRE_TOOL_PLAN_LINES = 30
 
 
 def rel(path: Path, root: Path) -> str:
@@ -237,12 +235,26 @@ def pre_tool(info: dict[str, Any], root: Path) -> None:
         emit_json({"decision": "allow"})
         return
     task_dir, task_plan, findings, progress = task_paths(info)
-    message = (
-        f"[superpowers-memory] Active task {info.get('task_id')}. "
-        f"Use {rel(task_plan, root)} as the roadmap; write durable discoveries to "
-        f"{rel(findings, root)} and execution results to {rel(progress, root)}."
+    plan_head = read_lines(task_plan, PRE_TOOL_PLAN_LINES)
+    message_lines = [
+        f"[superpowers-memory] Active task: {info.get('task_id')}",
+        f"Roadmap: {rel(task_plan, root)}",
+        f"Findings: {rel(findings, root)}",
+        f"Progress: {rel(progress, root)}",
+        "",
+        "Current roadmap context:",
+    ]
+    if plan_head:
+        message_lines.extend(plan_head)
+    else:
+        message_lines.append("[task_plan.md missing or empty]")
+    message_lines.extend(
+        [
+            "",
+            "Use task_plan.md as the only implementation roadmap.",
+        ]
     )
-    emit_json({"systemMessage": message})
+    emit_json({"systemMessage": "\n".join(message_lines)})
 
 
 def permission(info: dict[str, Any], root: Path) -> None:
@@ -260,45 +272,17 @@ def post_tool(info: dict[str, Any], root: Path, payload: dict[str, Any]) -> None
     if not info.get("active"):
         return
 
-    tool_input = payload.get("tool_input") if isinstance(payload.get("tool_input"), dict) else {}
-    command = tool_input.get("command") if isinstance(tool_input.get("command"), str) else ""
-    response = payload.get("tool_response") if isinstance(payload.get("tool_response"), str) else ""
-    delta = len(command) + len(response)
-
-    state = load_state(info)
-    post = state.get("post_tool") if isinstance(state.get("post_tool"), dict) else {}
-    post["chars_since_memory_checkpoint"] = int(post.get("chars_since_memory_checkpoint", 0)) + delta
-    post["tool_calls_since_checkpoint"] = int(post.get("tool_calls_since_checkpoint", 0)) + 1
-
-    high_value = bool(re.search(r"\b(pytest|npm test|make|git commit|git push|pip install|conda install|train|eval|validate|benchmark)\b", command))
-    failure = bool(re.search(r"(traceback|error|failed|exception|exit code [1-9])", response, re.IGNORECASE))
-    should_emit = (
-        post["chars_since_memory_checkpoint"] >= POST_TOOL_CHAR_THRESHOLD
-        or post["tool_calls_since_checkpoint"] >= POST_TOOL_CALL_THRESHOLD
-        or high_value
-        or failure
+    _, task_plan, findings, progress = task_paths(info)
+    message = "\n".join(
+        [
+            f"[superpowers-memory] Active task {info.get('task_id')}: update persistent memory if task state changed.",
+            f"- {rel(progress, root)}: actions just completed, command results, failures, verification evidence, and next step.",
+            f"- {rel(task_plan, root)}: checkbox/status if roadmap state changed.",
+            f"- {rel(findings, root)}: new constraints, root causes, or decisions.",
+            "Do not automatically write trivial details; record durable task state.",
+        ]
     )
-
-    if should_emit:
-        _, task_plan, findings, progress = task_paths(info)
-        message = "\n".join([
-            "[superpowers-memory] Memory checkpoint: enough new command/output context has accumulated.",
-            "If task state changed, update durable files:",
-            f"- {rel(progress, root)}: actions, tests, failures, validation evidence, next step.",
-            f"- {rel(findings, root)}: new constraints, root causes, decisions.",
-            f"- {rel(task_plan, root)}: checkbox/status only when roadmap changed.",
-            "Do not record trivial inspection commands unless they changed understanding.",
-        ])
-        post["chars_since_memory_checkpoint"] = 0
-        post["tool_calls_since_checkpoint"] = 0
-        post["last_checkpoint_at"] = time.time()
-        state["post_tool"] = post
-        save_state(info, state)
-        emit_json({"systemMessage": message})
-        return
-
-    state["post_tool"] = post
-    save_state(info, state)
+    emit_json({"systemMessage": message})
 
 
 def pre_compact(info: dict[str, Any], root: Path) -> None:

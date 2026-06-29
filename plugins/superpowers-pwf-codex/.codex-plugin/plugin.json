@@ -1,6 +1,6 @@
 {
   "name": "superpowers-pwf-codex",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Superpowers workflows with native persistent task memory for Codex.",
   "author": {
     "name": "xiaobaiv",
