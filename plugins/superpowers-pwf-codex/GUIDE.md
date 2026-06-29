@@ -37,7 +37,7 @@ Superpowers 是唯一工作流主体：
 | `.superpowers/tasks/<task>/findings.md` | 需求、设计、约束、调研、根因、关键决策 |
 | `.superpowers/tasks/<task>/progress.md` | 执行时间线、测试结果、失败、验证证据、下一步 |
 | `.superpowers/tasks/<task>/sdd/progress.md` | 当前任务的 SDD 分发 ledger，用于避免重复 dispatch |
-| `.superpowers/tasks/<task>/.hook-state.json` | hook 内部节流状态，不需要人类维护 |
+| `.superpowers/tasks/<task>/.hook-state.json` | 预留给 hook 的内部状态文件，不需要人类维护 |
 
 不要为新任务创建旧的 artifact-type spec/plan 目录。`task_plan.md` 就是正式实现计划，`findings.md` 就是设计/spec memory。
 
@@ -80,6 +80,8 @@ plugins/superpowers-pwf-codex/runtime/superpowers-memory/init-task.sh "Auth Flow
     task_plan.md
     findings.md
     progress.md
+    sdd/
+      progress.md
 ```
 
 ## 日常工作流
@@ -135,19 +137,20 @@ plugins/superpowers-pwf-codex/runtime/superpowers-memory/set-active-task.sh 2026
 | --- | --- |
 | `SessionStart` | 注入 Superpowers 规则和当前 task 摘要 |
 | `UserPromptSubmit` | 每次用户消息前注入当前 roadmap 位置和最近进展的摘要 |
-| `PreToolUse` | Bash 前提醒使用当前 task roadmap |
+| `PreToolUse` | 每次 Bash 前注入当前 `task_plan.md` 的 roadmap context |
 | `PermissionRequest` | 审批前提示命令应对照当前 roadmap |
-| `PostToolUse` | 低频 memory checkpoint；只提醒，不自动写文件 |
+| `PostToolUse` | 每次 Bash 后提醒按需更新 `progress.md/findings.md/task_plan.md`；只提醒，不自动写文件 |
 | `PreCompact` | 压缩前提醒刷新 `task_plan.md/findings.md/progress.md` 和当前任务的 SDD ledger |
 | `Stop` | 回合结束时 advisory 检查未完成 checkbox 和验证证据 |
 
 Hooks 不会自动修改 `task_plan.md`、`findings.md` 或 `progress.md`。自动写入会污染长期 memory；真正的更新应由 agent 在理解上下文后主动写入。
 
-## 上下文噪音控制
+## 上下文注入策略
 
 - `UserPromptSubmit` 只注入摘要，不反复塞完整 plan。
 - 如果 task 文件没有变化，会降级为一行提示。
-- `PostToolUse` 只有在累计命令/输出较多、工具调用次数较多、命令高价值、或出现错误时才提示。
+- `PreToolUse` 当前采用 PWF 原版思路：只要有 active task，每次 Bash 前都把 roadmap 拉回注意力。
+- `PostToolUse` 当前不节流：只要有 active task，每次 Bash 后都提醒 agent 判断是否需要更新持久 memory。
 - `PreCompact` 不节流，因为 compact 是明确遗忘边界。
 
 ## 人类需要做什么
