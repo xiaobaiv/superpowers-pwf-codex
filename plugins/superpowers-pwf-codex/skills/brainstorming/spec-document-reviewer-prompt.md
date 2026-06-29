@@ -4,7 +4,7 @@ Use this template when dispatching a spec document reviewer subagent.
 
 **Purpose:** Verify the spec is complete, consistent, and ready for implementation planning.
 
-**Dispatch after:** Spec document is written to docs/superpowers/specs/
+**Dispatch after:** Design/spec findings are written to `.superpowers/tasks/<task>/findings.md`.
 
 ```
 Subagent (general-purpose):
@@ -12,7 +12,7 @@ Subagent (general-purpose):
   prompt: |
     You are a spec document reviewer. Verify this spec is complete and ready for planning.
 
-    **Spec to review:** [SPEC_FILE_PATH]
+    **Findings/spec file to review:** [FINDINGS_FILE_PATH]
 
     ## What to Check
 

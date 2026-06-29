@@ -1,38 +1,49 @@
-# Superpowers + PWF Codex 使用指南
+# Superpowers Persistent Memory 使用指南
 
-这份指南面向使用者，而不是插件开发者。读完后，你应该知道如何安装、如何在新项目里开始一个任务、如何在同一个项目下切换多个任务，以及哪些文件应该由人类检查。
-
-## 适合谁
-
-使用这个集成包，如果你希望 Codex 在一个项目里同时做到两件事：
-
-- 用 Superpowers 管住工程流程：需求澄清、设计、写计划、TDD、调试、代码审查、最终验证。
-- 用 PWF 在磁盘上保存任务记忆：当前做到哪一步、发现了什么、改了什么、下次怎么恢复。
-
-这个包默认假设你在一个 working tree 里工作，不自动创建 git worktree。
+这份指南面向人类使用者。安装后，Codex 会继续使用 Superpowers 的工程工作流，但不再把设计、计划和进度分散到不同 artifact 目录。每个任务都有自己的 `.superpowers/tasks/<task>/` 工作目录。
 
 ## 核心概念
 
-Superpowers 是工作流主线，决定“现在该用什么工程方法”。例如新功能先 brainstorming，再 writing-plans，再 TDD/SDD/执行计划，最后 verification-before-completion。
+Superpowers 是唯一工作流主体：
 
-PWF 是持久记忆层，负责“这项任务的状态写在哪里”。它把任务状态写到项目目录中的 markdown 文件里，这些文件会在 Codex 上下文清空、压缩或新会话恢复时继续可读。
+- 新功能：`brainstorming` -> `writing-plans` -> `test-driven-development` / `subagent-driven-development` / `executing-plans` -> `verification-before-completion`
+- bug：`systematic-debugging` -> `test-driven-development` -> `verification-before-completion`
+- review：`requesting-code-review` / `receiving-code-review`
 
-两者的分工是：
+持久化 memory 只解决一个问题：Codex 如何在上下文压缩、新会话、多任务切换后恢复当前任务状态。
 
-| 文件或目录 | 责任 |
+## 文件结构
+
+```text
+.superpowers/
+  active_task
+  sessions/
+    <session-id>.task
+  tasks/
+    <task-slug>/
+      task_plan.md
+      findings.md
+      progress.md
+      .hook-state.json
+  sdd/
+    progress.md
+```
+
+| 文件 | 职责 |
 | --- | --- |
-| `.planning/<task>/task_plan.md` | 当前任务阶段、阻塞点、当前 Superpowers workflow、正式 artifact 链接 |
-| `.planning/<task>/findings.md` | 调研发现、约束、决策、根因、失败尝试 |
-| `.planning/<task>/progress.md` | 人类可读的时间线、测试结果、审查结果、下一步 |
-| `docs/superpowers/specs/...` | Superpowers 生成的正式设计文档 |
-| `docs/superpowers/plans/...` | Superpowers 生成的正式实现计划 |
-| `.superpowers/sdd/progress.md` | SDD 的权威任务 ledger |
+| `.superpowers/active_task` | 当前默认任务，单行 task slug |
+| `.superpowers/sessions/<session-id>.task` | 可选会话 pin，多会话并行时优先于全局 active task |
+| `.superpowers/tasks/<task>/task_plan.md` | 唯一正式 roadmap / implementation plan |
+| `.superpowers/tasks/<task>/findings.md` | 需求、设计、约束、调研、根因、关键决策 |
+| `.superpowers/tasks/<task>/progress.md` | 执行时间线、测试结果、失败、验证证据、下一步 |
+| `.superpowers/tasks/<task>/.hook-state.json` | hook 内部节流状态，不需要人类维护 |
+| `.superpowers/sdd/progress.md` | SDD 分发 ledger，只用于避免重复 dispatch |
 
-PWF 文件应该索引和总结 Superpowers artifact，不应该把完整 spec 或完整 implementation plan 复制一遍。
+不要为新任务创建旧的 artifact-type spec/plan 目录。`task_plan.md` 就是正式实现计划，`findings.md` 就是设计/spec memory。
 
 ## 安装
 
-推荐使用 Codex CLI 的 plugin marketplace 安装路径：
+推荐使用 Codex CLI plugin marketplace：
 
 ```bash
 codex plugin marketplace add xiaobaiv/superpowers-pwf-codex --ref main
@@ -40,27 +51,177 @@ codex plugin list --available --json
 codex plugin add superpowers-pwf-codex@superpowers-pwf-codex
 ```
 
-安装后开启一个新的 Codex 会话，让 Codex 重新加载 plugin skills 和 hooks。
+安装后开启新的 Codex 会话，让 skills 和 hooks 重新加载。
 
-不要用 `skill-installer` 安装整个仓库。`skill-installer` 只接受“目录里直接有 `SKILL.md`”的单个 skill，而这个仓库是 plugin marketplace，包含多个 skills、hooks、assets 和 plugin metadata。
+不要用 `skill-installer` 安装整个仓库。这个仓库是 plugin marketplace，不是单个 skill。
 
-如果你的 Codex 环境没有触发 plugin-bundled hooks，可以使用手动 fallback。先把仓库 clone 到本地：
+## 开始一个新任务
 
-```bash
-git clone git@github.com:xiaobaiv/superpowers-pwf-codex.git
-cd superpowers-pwf-codex
+进入项目根目录后，让 Codex 初始化：
+
+```text
+Use Superpowers persistent memory. Start a new task for Auth Flow.
 ```
 
-然后把插件目录里的 `hooks/` 和 `skills/` 一起复制到 `~/.codex/`：
+或者手动运行插件脚本：
 
 ```bash
-mkdir -p ~/.codex/hooks ~/.codex/skills
+plugins/superpowers-pwf-codex/runtime/superpowers-memory/init-task.sh "Auth Flow"
+```
+
+如果是 marketplace 安装，脚本位于 Codex plugin cache 中；通常不需要人类手动找路径，让 Codex 调用即可。
+
+初始化结果类似：
+
+```text
+.superpowers/
+  active_task
+  tasks/2026-06-30-auth-flow/
+    task_plan.md
+    findings.md
+    progress.md
+```
+
+## 日常工作流
+
+新功能：
+
+1. 初始化或确认 active task。
+2. `brainstorming` 把需求、约束、设计和调研写入 `findings.md`。
+3. `writing-plans` 把正式执行计划写入 `task_plan.md`。
+4. `executing-plans` 或 `subagent-driven-development` 读取同一个 `task_plan.md` 执行。
+5. TDD、执行结果、失败、验证证据写入 `progress.md`。
+6. 完成前运行 `verification-before-completion`，并把证据写入 `progress.md`。
+
+bug 修复：
+
+1. `systematic-debugging` 把症状、复现、假设、证据、根因写入 `findings.md`。
+2. 修复尝试、命令、输出、验证结果写入 `progress.md`。
+3. 如果行为变化需要代码，使用 TDD。
+4. 如果调试发现 roadmap 错误，更新 `task_plan.md` 或请用户确认。
+
+## 多任务切换
+
+查看当前任务：
+
+```bash
+plugins/superpowers-pwf-codex/runtime/superpowers-memory/set-active-task.sh
+```
+
+切换全局 active task：
+
+```bash
+plugins/superpowers-pwf-codex/runtime/superpowers-memory/set-active-task.sh 2026-06-30-auth-flow
+```
+
+只给某个会话 pin 一个 task：
+
+```bash
+plugins/superpowers-pwf-codex/runtime/superpowers-memory/set-active-task.sh 2026-06-30-auth-flow --session <session-id>
+```
+
+解析优先级：
+
+1. `SUPERPOWERS_TASK_ID`
+2. `.superpowers/sessions/<session-id>.task`
+3. `.superpowers/active_task`
+4. 如果只有一个 `.superpowers/tasks/*`，自动使用它
+
+## Hooks 会做什么
+
+人类不需要手动执行 hooks。Codex 会在对应时机自动运行。
+
+| Hook | 作用 |
+| --- | --- |
+| `SessionStart` | 注入 Superpowers 规则和当前 task 摘要 |
+| `UserPromptSubmit` | 每次用户消息前注入当前 roadmap 位置和最近进展的摘要 |
+| `PreToolUse` | Bash 前提醒使用当前 task roadmap |
+| `PermissionRequest` | 审批前提示命令应对照当前 roadmap |
+| `PostToolUse` | 低频 memory checkpoint；只提醒，不自动写文件 |
+| `PreCompact` | 压缩前提醒刷新 `task_plan.md/findings.md/progress.md` 和 SDD ledger |
+| `Stop` | 回合结束时 advisory 检查未完成 checkbox 和验证证据 |
+
+Hooks 不会自动修改 `task_plan.md`、`findings.md` 或 `progress.md`。自动写入会污染长期 memory；真正的更新应由 agent 在理解上下文后主动写入。
+
+## 上下文噪音控制
+
+- `UserPromptSubmit` 只注入摘要，不反复塞完整 plan。
+- 如果 task 文件没有变化，会降级为一行提示。
+- `PostToolUse` 只有在累计命令/输出较多、工具调用次数较多、命令高价值、或出现错误时才提示。
+- `PreCompact` 不节流，因为 compact 是明确遗忘边界。
+
+## 人类需要做什么
+
+- 给复杂任务起清楚的名字。
+- 在多个任务并行时确认 active task 或 session pin。
+- 审阅 `findings.md` 和 `task_plan.md`，尤其是需求和计划。
+- 如果 `task_plan.md` 与当前需求冲突，明确告诉 Codex 哪个为准。
+- 在 Codex 外做了重要修改时告诉 Codex，让它补写到 `progress.md` 或 `findings.md`。
+
+## 推荐提示词
+
+新功能：
+
+```text
+Use Superpowers persistent memory for this task: <任务描述>.
+If there is no active task, initialize one first. Use findings.md for design/spec memory and task_plan.md as the only implementation plan.
+```
+
+继续任务：
+
+```text
+Continue the active Superpowers task. First summarize the current roadmap position, recent progress, and next step from .superpowers/tasks/<task>/.
+```
+
+切换任务：
+
+```text
+Switch the active Superpowers task to 2026-06-30-auth-flow and continue only from that task directory.
+```
+
+调试：
+
+```text
+Use systematic-debugging with Superpowers persistent memory. Record symptoms, reproduction, hypotheses, and root cause in findings.md, and commands/results in progress.md.
+```
+
+## 旧结构迁移
+
+旧版本可能留下这些文件：
+
+```text
+docs/superpowers/specs/
+docs/superpowers/plans/
+.planning/
+```
+
+新工作流不会把它们作为 active source。要迁移：
+
+```bash
+python3 plugins/superpowers-pwf-codex/runtime/superpowers-memory/migrate-legacy.py --dry-run
+python3 plugins/superpowers-pwf-codex/runtime/superpowers-memory/migrate-legacy.py
+```
+
+迁移脚本只复制/汇总，不删除旧文件。迁移后检查：
+
+```bash
+find .superpowers/tasks -maxdepth 2 -type f | sort
+cat .superpowers/active_task
+```
+
+## 手动 fallback
+
+如果 plugin-bundled hooks 在你的 Codex 环境里不触发，可以从仓库根目录复制：
+
+```bash
+mkdir -p ~/.codex/hooks ~/.codex/skills ~/.codex/runtime
 cp -R plugins/superpowers-pwf-codex/hooks/. ~/.codex/hooks/
 cp -R plugins/superpowers-pwf-codex/skills/. ~/.codex/skills/
+cp -R plugins/superpowers-pwf-codex/runtime/. ~/.codex/runtime/
 cp plugins/superpowers-pwf-codex/hooks/hooks-codex.json ~/.codex/hooks.json
 ```
 
-确认 `~/.codex/config.toml` 里启用了 hooks：
+确认启用 hooks：
 
 ```toml
 [features]
@@ -69,300 +230,32 @@ hooks = true
 
 然后重启 Codex。
 
-不要同时安装 standalone Superpowers hooks 和 standalone PWF hooks。这个集成包已经提供了一份合并后的 hook 配置。
+## 排错
 
-## 验证安装
+**`SKILL.md not found in selected skill directory`**
 
-在任意测试目录里启动一个新的 Codex 会话。SessionStart 应该先加载 Superpowers 规则，再加载 PWF 的当前计划状态。
+你用了 `skill-installer` 安装整个仓库。改用 `codex plugin marketplace add`。
 
-如果你还没有创建 PWF 计划，PWF hook 会保持安静，这是正常的。
+**插件没有出现在 available 列表**
 
-你也可以检查插件是否已安装并启用：
-
-```bash
-codex plugin list
-```
-
-输出中应该出现 `superpowers-pwf-codex@superpowers-pwf-codex`，并显示为 installed/enabled。
-
-如果你使用的是手动 fallback，再检查这些文件：
+确认仓库根目录有 `.agents/plugins/marketplace.json`，并且 marketplace add 命令没有报错：
 
 ```bash
-test -f ~/.codex/hooks/hooks-codex.json
-test -f ~/.codex/hooks/session-start-codex
-test -f ~/.codex/hooks/session-start.sh
-test -f ~/.codex/skills/using-superpowers/SKILL.md
-test -f ~/.codex/skills/planning-with-files/SKILL.md
-test -f ~/.codex/skills/superpowers-pwf-memory/SKILL.md
-```
-
-## 在新项目里开始任务
-
-进入你的项目根目录：
-
-```bash
-cd /path/to/your-project
-```
-
-为这个任务创建 PWF 计划。正常通过 plugin marketplace 安装时，推荐直接让 Codex 来初始化：
-
-```text
-使用 Superpowers + PWF memory。请为 Auth Flow 创建 slug-mode PWF plan。
-```
-
-它会创建类似这样的结构：
-
-```text
-.planning/
-  .active_plan
-  2026-06-29-auth-flow/
-    task_plan.md
-    findings.md
-    progress.md
-```
-
-然后在 Codex 里直接说：
-
-```text
-使用 Superpowers + PWF memory 来完成这个任务：实现登录和注册流程。
-```
-
-Codex 应该读取 `.planning/.active_plan` 指向的任务目录，把当前 Superpowers workflow 写入 `task_plan.md`，并持续更新 `findings.md` 和 `progress.md`。
-
-如果你使用的是手动 fallback 安装，也可以在项目根目录直接运行：
-
-```bash
-~/.codex/skills/planning-with-files/scripts/init-session.sh "Auth Flow"
-```
-
-## 日常使用流程
-
-一个典型新功能任务是：
-
-1. 人类创建 PWF 任务目录。
-2. 人类向 Codex 描述目标。
-3. Codex 使用 `superpowers-pwf-memory` 读取任务记忆。
-4. Codex 使用 `brainstorming` 澄清需求并写 spec。
-5. Codex 使用 `writing-plans` 写 implementation plan。
-6. Codex 使用 TDD、SDD 或 executing-plans 执行。
-7. Codex 在每个阶段后更新 `progress.md` 和 `task_plan.md`。
-8. Codex 在声称完成前运行 `verification-before-completion`。
-9. 人类检查最终结果、PWF 进度、Superpowers artifact 和 git diff。
-
-一个 bug 修复任务是：
-
-1. 人类创建或切换到对应 PWF 任务。
-2. 人类描述症状、复现步骤、预期行为。
-3. Codex 把症状和环境写入 PWF。
-4. Codex 使用 `systematic-debugging` 找根因。
-5. 如果涉及代码行为变化，Codex 使用 TDD 写失败测试，再修复。
-6. Codex 把根因、失败尝试、验证证据写入 PWF。
-
-## 多任务和切换
-
-推荐使用 slug-mode，也就是每个任务一个 `.planning/<date>-<slug>/` 目录。这样同一个项目可以同时保留多个任务：
-
-```text
-.planning/
-  .active_plan
-  2026-06-29-auth-flow/
-  2026-06-29-payment-bug/
-  2026-06-30-admin-dashboard/
-```
-
-切换当前任务有两种方式。
-
-方式一：让 Codex 设置 active plan：
-
-```text
-请把当前 PWF active plan 切换到 2026-06-29-payment-bug。
-```
-
-如果你使用的是手动 fallback 安装，也可以运行：
-
-```bash
-~/.codex/skills/planning-with-files/scripts/set-active-plan.sh 2026-06-29-payment-bug
-```
-
-方式二：只给当前终端指定 `PLAN_ID`：
-
-```bash
-export PLAN_ID=2026-06-29-payment-bug
-```
-
-解析优先级是：
-
-1. `PLAN_ID`
-2. `.planning/.active_plan`
-3. `.planning/` 里最近修改且包含 `task_plan.md` 的任务目录
-4. 项目根目录下的 legacy `task_plan.md`
-
-如果你在同一个项目里同时开多个 Codex 会话，建议显式使用 `PLAN_ID`，避免两个会话误读同一个 active plan。
-
-## PWF 的几种模式
-
-| 模式 | 创建方式 | 文件位置 | 适用场景 |
-| --- | --- | --- | --- |
-| root / legacy mode | `init-session.sh` | 项目根目录 `task_plan.md` 等 | 旧项目、单任务、兼容旧流程 |
-| slug-mode | `init-session.sh "Task Name"` | `.planning/<date>-task-name/` | 推荐默认；同一项目多个任务 |
-| plan-dir mode | `init-session.sh --plan-dir "Task Name"` | `.planning/<date>-task-name/` | 显式要求目录模式 |
-| PLAN_ID selection | `export PLAN_ID=<id>` | 选择已有 `.planning/<id>/` | 多会话或临时切换任务 |
-| active-plan selection | 写 `.planning/.active_plan` | 选择已有 `.planning/<id>/` | 单 tree 下的默认当前任务 |
-| autonomous / gated | `--autonomous` 或 `--gated` | 额外生成 `.mode` 等文件 | 高自动化场景；本集成默认不依赖 |
-
-这个集成包推荐 slug-mode。root mode 仍可用，但不适合同一项目下多个任务。
-
-## Hooks 会做什么
-
-人类不需要手动执行 hooks。Codex 会在对应时机自动运行它们。
-
-| Hook | 作用 |
-| --- | --- |
-| `SessionStart` | 先注入 Superpowers 规则，再注入 PWF catchup 和 active plan |
-| `UserPromptSubmit` | 每次用户发消息时提醒 Codex 当前 PWF plan 和最近 progress |
-| `PreToolUse` | Bash 前把当前 `task_plan.md` 拉回注意力 |
-| `PermissionRequest` | 需要权限审批时提醒当前 active plan |
-| `PostToolUse` | Bash 后提醒更新 PWF memory |
-| `PreCompact` | 上下文压缩前提醒保存 PWF 和 SDD ledger |
-| `Stop` | 回合结束时给出 PWF 进度提醒；默认 advisory，不硬阻塞 |
-
-hooks 负责提醒和注入上下文，不会替你决定需求，也不会替代人类 review。
-
-## 人类需要做什么
-
-你主要负责这些事情：
-
-- 在复杂任务开始前创建 PWF 计划。
-- 给任务起一个清楚的名字，例如 `Auth Flow`、`Payment Retry Bug`。
-- 在多任务并行时切换 `.planning/.active_plan` 或设置 `PLAN_ID`。
-- 审阅 Codex 生成的 spec、implementation plan、代码 diff 和验证结果。
-- 当 `task_plan.md` 和 Superpowers plan 冲突时，明确告诉 Codex 哪个为准。
-- 不要把 standalone PWF hooks 覆盖到这个集成包的 hook 配置上。
-
-你通常不需要手动维护 `progress.md`，但如果你自己在 Codex 之外做了重要修改，最好告诉 Codex，让它补写到 PWF 文件里。
-
-## 推荐提示词
-
-新功能：
-
-```text
-使用 Superpowers + PWF memory，在当前项目中完成这个任务：<任务描述>。
-如果没有 active PWF plan，请先提醒我创建；如果已经有 active plan，请先读取 task_plan.md、findings.md、progress.md。
-```
-
-修 bug：
-
-```text
-使用 Superpowers + PWF memory 调试这个问题：<症状>。
-请先记录复现信息和环境，再用 systematic-debugging 找根因，不要直接猜修复。
-```
-
-恢复任务：
-
-```text
-继续当前 PWF active plan。先读取 task_plan.md、findings.md、progress.md，然后告诉我当前阶段和下一步。
-```
-
-切换任务后确认：
-
-```text
-我已经切换 active plan。请只读取当前 active plan，不要混入其他 .planning 任务目录。
-```
-
-## 常见问题
-
-**`skill-installer` 报 `SKILL.md not found in selected skill directory`。**
-
-你正在用错安装器。这个仓库不是单个 skill，而是 Codex plugin marketplace。请使用：
-
-```bash
-codex plugin marketplace add xiaobaiv/superpowers-pwf-codex --ref main
-codex plugin add superpowers-pwf-codex@superpowers-pwf-codex
-```
-
-只有在你明确只想安装某个单独 skill 时，才使用类似：
-
-```bash
-install-skill-from-github.py --repo xiaobaiv/superpowers-pwf-codex --path plugins/superpowers-pwf-codex/skills/superpowers-pwf-memory
-```
-
-这种方式不会安装 hooks，也不是推荐安装方式。
-
-**`marketplace add` 后 `codex plugin list --available --json` 看不到插件。**
-
-确认你安装的是 marketplace repo，而不是 plugin 子目录。仓库根目录必须包含：
-
-```text
-.agents/plugins/marketplace.json
-plugins/superpowers-pwf-codex/.codex-plugin/plugin.json
-```
-
-然后重新运行：
-
-```bash
-codex plugin marketplace add xiaobaiv/superpowers-pwf-codex --ref main
 codex plugin list --available --json
 ```
 
-**Codex 没有显示 PWF 当前计划。**
+**hooks 没有触发**
 
-先确认项目里有 `.planning/.active_plan`，并且它指向的目录存在 `task_plan.md`。如果你通过 plugin marketplace 安装，确认 `codex plugin list` 显示 `superpowers-pwf-codex@superpowers-pwf-codex` 已安装并启用。如果你使用手动 fallback，再确认 `~/.codex/hooks.json` 是这个包的 `hooks/hooks-codex.json`。
+先重开 Codex 会话。仍然不触发时，使用上面的手动 fallback，并确认 `~/.codex/config.toml` 启用了 hooks。
 
-如果你是通过 `codex plugin add` 安装的，并且 plugin skills 能用但 hooks 不触发，说明你的 Codex 环境可能没有启用 plugin-bundled hooks。使用安装章节里的手动 fallback，把 `hooks/`、`skills/` 和 `hooks/hooks-codex.json` 复制到 `~/.codex/`。
+**Codex 读错任务**
 
-**Codex 读错了任务。**
-
-检查是否设置了 `PLAN_ID`。它的优先级高于 `.planning/.active_plan`：
+检查：
 
 ```bash
-echo "$PLAN_ID"
-cat .planning/.active_plan
+cat .superpowers/active_task
+find .superpowers/sessions -type f -maxdepth 1 -print -exec cat {} \;
+echo "$SUPERPOWERS_TASK_ID"
 ```
 
-**安装后 Superpowers 没加载。**
-
-确认你复制了 `skills/`，不只是 `hooks/`：
-
-```bash
-test -f ~/.codex/skills/using-superpowers/SKILL.md
-```
-
-**为什么不自动用 worktree？**
-
-这个集成包默认服务单 working tree 工作方式。PWF slug-mode 已经能在一个 tree 下区分多个任务。只有你明确要求 worktree 时，才应该使用 `using-git-worktrees`。
-
-**可以不用 PWF 吗？**
-
-可以。Superpowers 技能仍然存在。但复杂任务建议先创建 PWF plan，否则上下文压缩、`/clear` 或多会话恢复时更容易丢状态。
-
-**可以只装 PWF 或只装 Superpowers 吗？**
-
-可以，但那就不是这个集成包的使用方式。这个包的目标是用一份合并 hook 配置把两者协调起来，避免两个独立 hook 配置互相覆盖。
-
-## 上传或更新这个包
-
-如果你维护自己的 fork，常见流程是：
-
-```bash
-git status
-git add README.md .agents plugins
-git commit -m "Update Superpowers PWF Codex guide"
-git push
-```
-
-发布前至少检查：
-
-```bash
-python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
-python3 -m json.tool plugins/superpowers-pwf-codex/.codex-plugin/plugin.json >/dev/null
-python3 -m json.tool plugins/superpowers-pwf-codex/hooks/hooks-codex.json >/dev/null
-python3 - <<'PY'
-from pathlib import Path
-for path in Path("plugins/superpowers-pwf-codex/hooks").glob("*.py"):
-    compile(path.read_text(), str(path), "exec")
-print("python_syntax_ok")
-PY
-find . -path ./.git -prune -o \( -name '__pycache__' -o -name '*.pyc' -o -name '.DS_Store' \) -print
-```
-
-最后一条命令应该没有输出。
+`SUPERPOWERS_TASK_ID` 优先级最高；session pin 优先于全局 `active_task`。

@@ -18,11 +18,20 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-integration_note="Persistent memory contract:\nIf a PWF active plan exists, read and respect it before applying any Superpowers workflow.\nFor complex tasks without an active PWF plan, initialize a slug-mode PWF plan first.\nSuperpowers artifacts are formal deliverables; PWF files are the task memory and index.\nSingle-tree default: use PWF slug-mode instead of git worktrees unless the user explicitly asks otherwise."
+integration_note="$(cat <<'EOF'
+Superpowers persistent workflow contract:
+Superpowers is the only workflow authority.
+Use .superpowers/tasks/<task>/task_plan.md as the only implementation roadmap.
+Use .superpowers/tasks/<task>/findings.md for requirements, design, research, constraints, root causes, and decisions.
+Use .superpowers/tasks/<task>/progress.md for execution history, verification evidence, failures, and next step.
+Do not create legacy artifact-type task directories for new work.
+Use .superpowers/sdd/progress.md only as the SDD dispatch ledger.
+EOF
+)"
 
 using_superpowers_escaped=$(escape_for_json "$using_superpowers_content")
 integration_note_escaped=$(escape_for_json "$integration_note")
-session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, follow the Codex skill-loading instructions in that skill:**\n\n${using_superpowers_escaped}\n\n**Superpowers + PWF integration note:**\n\n${integration_note_escaped}\n</EXTREMELY_IMPORTANT>"
+session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, follow the Codex skill-loading instructions in that skill:**\n\n${using_superpowers_escaped}\n\n**Superpowers persistent workflow note:**\n\n${integration_note_escaped}\n</EXTREMELY_IMPORTANT>"
 
 printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context" | cat
 

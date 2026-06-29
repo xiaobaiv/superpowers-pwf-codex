@@ -137,3 +137,9 @@ From 24 failure memories:
 Run the command. Read the output. THEN claim the result.
 
 This is non-negotiable.
+
+## Persistent Memory Integration
+
+- Before claiming completion, read `.superpowers/tasks/<active-task>/task_plan.md` and confirm there are no unchecked roadmap items unless the user explicitly accepts a partial state.
+- Append verification commands, exit status, output summary, pass/fail result, and remaining gaps to `.superpowers/tasks/<active-task>/progress.md`.
+- If verification reveals missing requirements or plan gaps, return to `superpowers:writing-plans` or update the active `task_plan.md` before claiming completion.

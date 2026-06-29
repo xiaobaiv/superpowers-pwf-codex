@@ -354,6 +354,13 @@ Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix 
 
 Never fix bugs without a test.
 
+## Persistent Memory Integration
+
+- Record important RED/GREEN/REFACTOR milestones and verification commands in `.superpowers/tasks/<active-task>/progress.md`.
+- Record root causes, new constraints, and durable test-design decisions in `.superpowers/tasks/<active-task>/findings.md`.
+- Update `.superpowers/tasks/<active-task>/task_plan.md` only for checkbox/status changes or when the roadmap itself needs a confirmed revision.
+- Do not create a separate planning file for TDD state.
+
 ## Testing Anti-Patterns
 
 When adding mocks or test utilities, read [testing-anti-patterns.md](testing-anti-patterns.md) to avoid common pitfalls:

@@ -26,9 +26,9 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write design findings** — save to the current task's `.superpowers/tasks/<task>/findings.md`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
+8. **User reviews written findings** — ask user to review the findings/design file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
@@ -103,10 +103,12 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-  - (User preferences for spec location override this default)
+- Ensure an active Superpowers task exists. If not, initialize one with `runtime/superpowers-memory/init-task.sh "<task name>"`.
+- Write the validated design/spec content to `.superpowers/tasks/<active-task>/findings.md`.
+- `findings.md` must include User Intent, Requirements, Constraints, Research Findings, Design Decisions, and Open Questions.
+- Do not create legacy artifact-type spec directories for new work.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
+- Commit only when the repository workflow calls for commits.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -119,9 +121,9 @@ After writing the spec document, look at it with fresh eyes:
 Fix any issues inline. No need to re-review — just fix and move on.
 
 **User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+After the spec review loop passes, ask the user to review the written findings/design file before proceeding:
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Design findings written to `.superpowers/tasks/<task>/findings.md`. Please review them and let me know if you want changes before we write the implementation plan."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 

@@ -13,10 +13,12 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
+**Context:** This Codex plugin uses Superpowers-native persistent task memory. The current task lives under `.superpowers/tasks/<task>/`.
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
+**Save plans to:** `.superpowers/tasks/<active-task>/task_plan.md`
+- If there is no active task, initialize one with `runtime/superpowers-memory/init-task.sh "<task name>"` before writing the plan.
+- `task_plan.md` is the only authoritative implementation roadmap. Do not create legacy artifact-type plan directories for new work.
+- Use `.superpowers/tasks/<active-task>/findings.md` as the source of requirements, design decisions, constraints, research findings, and open questions.
 
 ## Scope Check
 
@@ -157,7 +159,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `.superpowers/tasks/<task>/task_plan.md`. Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 

@@ -1,7 +1,7 @@
 {
   "name": "superpowers-pwf-codex",
   "interface": {
-    "displayName": "Superpowers + PWF Codex"
+    "displayName": "Superpowers Persistent Memory"
   },
   "plugins": [
     {

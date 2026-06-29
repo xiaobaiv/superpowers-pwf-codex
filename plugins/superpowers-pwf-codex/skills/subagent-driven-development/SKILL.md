@@ -257,6 +257,9 @@ a ledger file, not only in todos.
 - When a task's review comes back clean, append one line to the ledger in
   the same message as your other bookkeeping:
   `Task N: complete (commits <base7>..<head7>, review clean)`.
+- Also append one human-readable summary line to the active task's
+  `.superpowers/tasks/<task>/progress.md`; do not duplicate the full SDD
+  ledger there.
 - The ledger is your recovery map: the commits it names exist in git even
   when your context no longer remembers creating them. After compaction,
   trust the ledger and `git log` over your own recollection.
@@ -274,7 +277,7 @@ a ledger file, not only in todos.
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: docs/superpowers/plans/feature-plan.md]
+[Read plan file once: .superpowers/tasks/<task>/task_plan.md]
 [Create todos for all tasks]
 
 Task 1: Hook installation script
@@ -406,10 +409,16 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers-pwf-memory** - In this Codex integration, persistent PWF slug-mode is the default single-tree isolation and resume mechanism. Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for the final whole-branch review
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
+
+**Persistent memory contract:**
+- Read `.superpowers/tasks/<active-task>/task_plan.md` as the only implementation roadmap.
+- Use `.superpowers/sdd/progress.md` only as the SDD dispatch ledger.
+- Record cross-task summaries, blockers, and verification evidence in `.superpowers/tasks/<active-task>/progress.md`.
+- Record new durable constraints or design decisions in `.superpowers/tasks/<active-task>/findings.md`.
+- Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
 
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task

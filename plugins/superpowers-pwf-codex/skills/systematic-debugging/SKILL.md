@@ -287,6 +287,13 @@ These techniques are part of systematic debugging and available in this director
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
+## Persistent Memory Integration
+
+- Record symptoms, reproduction steps, hypotheses, evidence, root cause, failed attempts, and durable decisions in `.superpowers/tasks/<active-task>/findings.md`.
+- Record fix attempts, commands, outputs, verification results, blockers, and next step in `.superpowers/tasks/<active-task>/progress.md`.
+- If debugging proves the roadmap wrong, update `.superpowers/tasks/<active-task>/task_plan.md` or ask the user which plan change governs.
+- Do not create legacy planning files or separate debugging plans.
+
 ## Real-World Impact
 
 From debugging sessions:

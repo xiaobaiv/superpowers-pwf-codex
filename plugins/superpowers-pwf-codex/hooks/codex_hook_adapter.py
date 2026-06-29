@@ -34,23 +34,13 @@ def session_id_from_payload(payload: dict[str, Any]) -> str | None:
     sid = payload.get("session_id")
     if isinstance(sid, str) and sid:
         return sid
-    env_sid = os.environ.get("PWF_SESSION_ID", "")
+    env_sid = os.environ.get("SUPERPOWERS_SESSION_ID", "")
     return env_sid if env_sid else None
 
 
 def is_session_attached(root: Path, session_id: str | None) -> bool:
-    """Return True if this session should receive plan context.
-
-    Legacy mode: if .planning/sessions/ does not exist, always return True so
-    existing single-session users are not broken on upgrade.
-    Isolation mode: return True only when the session has an attached sentinel.
-    """
-    sessions_dir = root / ".planning" / "sessions"
-    if not sessions_dir.exists():
-        return True  # legacy — no sessions dir means single-session setup
-    if not session_id:
-        return False  # sessions dir exists but caller has no ID — stay silent
-    return (sessions_dir / f"{session_id}.attached").exists()
+    """Compatibility stub; active task isolation is handled by the resolver."""
+    return True
 
 
 def emit_json(payload: dict[str, Any]) -> None:
@@ -85,7 +75,6 @@ def main_guard(func) -> int:
     try:
         func()
     except Exception as exc:  # pragma: no cover
-        print(f"[planning-with-files hook] {exc}", file=sys.stderr)
+        print(f"[superpowers-memory hook] {exc}", file=sys.stderr)
         return 0
     return 0
-

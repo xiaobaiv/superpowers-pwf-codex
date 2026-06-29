@@ -2,7 +2,7 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
@@ -14,7 +14,7 @@
             "type": "command",
             "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/session-start.sh\" 2>/dev/null || true",
             "async": false,
-            "statusMessage": "Loading persistent planning memory"
+            "statusMessage": "Loading Superpowers task memory"
           }
         ]
       }
@@ -36,7 +36,7 @@
           {
             "type": "command",
             "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/pre_tool_use.py\" 2>/dev/null || true",
-            "statusMessage": "Checking persistent plan before Bash"
+            "statusMessage": "Checking Superpowers roadmap before Bash"
           }
         ]
       }
@@ -58,7 +58,7 @@
           {
             "type": "command",
             "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/post_tool_use.py\" 2>/dev/null || true",
-            "statusMessage": "Reviewing Bash against persistent plan"
+            "statusMessage": "Reviewing Bash against Superpowers task memory"
           }
         ]
       }
@@ -70,7 +70,7 @@
           {
             "type": "command",
             "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/pre-compact.sh\" 2>/dev/null || true",
-            "statusMessage": "Preparing persistent memory before compact"
+            "statusMessage": "Preparing Superpowers memory before compact"
           }
         ]
       }

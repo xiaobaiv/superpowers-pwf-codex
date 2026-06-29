@@ -204,6 +204,12 @@ You understand 1,2,3,6. Unclear on 4,5.
 
 When replying to inline review comments on GitHub, reply in the comment thread (`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), not as a top-level PR comment.
 
+## Persistent Memory Integration
+
+- Record review results, implemented fixes, rejected suggestions, commands, and verification evidence in `.superpowers/tasks/<active-task>/progress.md`.
+- Record accepted requirement changes, design changes, or reviewer-discovered constraints in `.superpowers/tasks/<active-task>/findings.md`.
+- If review feedback conflicts with `.superpowers/tasks/<active-task>/task_plan.md`, stop and ask which governs before changing code.
+
 ## The Bottom Line
 
 **External feedback = suggestions to evaluate, not orders to follow.**

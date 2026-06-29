@@ -16,7 +16,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
-1. Read plan file
+1. Read `.superpowers/tasks/<active-task>/task_plan.md` by default. If the user explicitly provides another plan path, ask whether to copy or migrate it into the active task before execution.
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
 4. If no concerns: Create todos for the plan items and proceed
@@ -27,7 +27,8 @@ For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Mark as completed
+4. Mark checkbox/status in `task_plan.md` as completed
+5. Append a concise execution summary, commands, results, blockers, and next step to `.superpowers/tasks/<active-task>/progress.md`
 
 ### Step 3: Complete Development
 
@@ -65,6 +66,11 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
-- **superpowers-pwf-memory** - In this Codex integration, persistent PWF slug-mode is the default single-tree isolation and resume mechanism. Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
+
+**Persistent memory contract:**
+- `.superpowers/tasks/<active-task>/task_plan.md` is the only implementation roadmap.
+- `.superpowers/tasks/<active-task>/progress.md` records execution and verification history.
+- `.superpowers/tasks/<active-task>/findings.md` records new constraints, root causes, and decisions discovered during execution.
+- Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
