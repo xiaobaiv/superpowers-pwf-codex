@@ -12,6 +12,8 @@ from typing import Any
 from resolve_active_task import load_payload, resolve, session_id_from_payload, cwd_from_payload
 
 MAX_SESSION_CHARS = 12000
+USER_PROMPT_PLAN_LINES = 50
+USER_PROMPT_PROGRESS_LINES = 20
 PRE_TOOL_PLAN_LINES = 30
 
 
@@ -218,16 +220,36 @@ def user_prompt(info: dict[str, Any], root: Path) -> None:
         return
 
     task_dir, task_plan, findings, progress = task_paths(info)
-    current_mtimes = mtimes(task_plan, findings, progress)
-    state = load_state(info)
-    key = f"user_prompt:{info.get('session_id') or 'global'}"
-    previous = state.get(key)
-    if isinstance(previous, dict) and previous.get("mtimes") == current_mtimes:
-        emit_json({"systemMessage": f"[superpowers-memory] Active task unchanged: {info.get('task_id')}. Continue using {rel(task_plan, root)} as the roadmap."})
-        return
-    state[key] = {"mtimes": current_mtimes, "updated_at": time.time()}
-    save_state(info, state)
-    emit_json({"systemMessage": render_summary(info, root, "user-prompt")})
+    message_lines = [
+        f"[superpowers-memory] ACTIVE TASK - current state: {info.get('task_id')}",
+        f"Task dir: {rel(task_dir, root)}",
+        f"Roadmap: {rel(task_plan, root)}",
+        f"Progress: {rel(progress, root)}",
+        f"Findings: {rel(findings, root)}",
+        "",
+        "=== task_plan.md head ===",
+    ]
+    plan_head = read_lines(task_plan, USER_PROMPT_PLAN_LINES)
+    if plan_head:
+        message_lines.extend(plan_head)
+    else:
+        message_lines.append("[task_plan.md missing or empty]")
+    message_lines.extend(["", "=== recent progress ==="])
+    recent = tail_lines(progress, USER_PROMPT_PROGRESS_LINES)
+    if recent:
+        message_lines.extend(recent)
+    else:
+        message_lines.append("[progress.md missing or empty]")
+    message_lines.extend(
+        [
+            "",
+            "[superpowers-memory] Read findings.md for requirements, design, research, constraints, root causes, and decisions. Continue from the current roadmap state.",
+        ]
+    )
+    text = "\n".join(message_lines).strip()
+    if len(text) > MAX_SESSION_CHARS:
+        text = text[:MAX_SESSION_CHARS] + "\n[superpowers-memory] Context truncated."
+    emit_json({"systemMessage": text})
 
 
 def pre_tool(info: dict[str, Any], root: Path) -> None:
