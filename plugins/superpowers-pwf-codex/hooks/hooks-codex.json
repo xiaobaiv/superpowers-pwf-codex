@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; sh \"$ROOT/hooks/user-prompt-submit.sh\" 2>/dev/null || true"
+            "command": "ROOT=\"${PLUGIN_ROOT:-$HOME/.codex}\"; python3 \"$ROOT/hooks/user_prompt_submit.py\" 2>/dev/null || true"
           }
         ]
       }
