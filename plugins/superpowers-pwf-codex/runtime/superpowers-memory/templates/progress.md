@@ -17,4 +17,4 @@
 
 ## SDD Summary
 
-- Details live in `.superpowers/sdd/progress.md` when SDD is active.
+- Details live in this task's `sdd/progress.md` when SDD is active.

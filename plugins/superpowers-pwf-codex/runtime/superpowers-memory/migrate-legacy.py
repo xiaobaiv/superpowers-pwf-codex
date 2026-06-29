@@ -184,7 +184,7 @@ def progress_from_legacy(plan_dir: Path | None) -> str:
             "",
             "## SDD Summary",
             "",
-            "- Details live in `.superpowers/sdd/progress.md` when SDD is active.",
+            "- Details live in this task's `sdd/progress.md` when SDD is active.",
             "",
         ]
     )
@@ -210,6 +210,12 @@ def migrate(root: Path, dry_run: bool) -> list[Action]:
         safe_write(task_dir / "task_plan.md", plan_text.rstrip() + "\n", dry_run, actions)
         safe_write(task_dir / "findings.md", findings_from_spec(spec), dry_run, actions)
         safe_write(task_dir / "progress.md", progress_from_legacy(legacy_dir), dry_run, actions)
+        safe_write(
+            task_dir / "sdd" / "progress.md",
+            f"# SDD Progress\n\nTask-local SDD dispatch ledger for `{task_id}`.\n",
+            dry_run,
+            actions,
+        )
         created[task_id] = str(task_dir)
 
     planning_by_key = {normalized_stem(path): path for path in planning_dirs}
@@ -229,14 +235,9 @@ def migrate(root: Path, dry_run: bool) -> list[Action]:
         migrate_task(task_id, plan.read_text(encoding="utf-8", errors="ignore"), spec, legacy_dir)
 
     if not dry_run:
-        (sp_root / "sdd").mkdir(parents=True, exist_ok=True)
-        sdd = sp_root / "sdd" / "progress.md"
-        if not sdd.exists():
-            sdd.write_text("# SDD Progress\n\n", encoding="utf-8")
         gitignore = sp_root / ".gitignore"
         if not gitignore.exists():
             gitignore.write_text(".hook-state.json\ntasks/*/.hook-state.json\n", encoding="utf-8")
-    actions.append(Action("ensure", str(sp_root / "sdd" / "progress.md")))
     actions.append(Action("ensure", str(sp_root / ".gitignore")))
 
     active = None

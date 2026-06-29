@@ -53,12 +53,14 @@ The task files are:
     task_plan.md
     findings.md
     progress.md
+    sdd/progress.md
 ```
 
 `task_plan.md` is the only authoritative implementation roadmap.
 `findings.md` carries requirements, design, research, constraints, root causes,
 and decisions. `progress.md` carries execution history, verification evidence,
-failures, and next step.
+failures, and next step. `sdd/progress.md` is task-local and records
+subagent dispatch state only for that task.
 
 ## Manual Fallback
 

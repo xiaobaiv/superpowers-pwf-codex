@@ -24,9 +24,9 @@ Superpowers 是唯一工作流主体：
       task_plan.md
       findings.md
       progress.md
+      sdd/
+        progress.md
       .hook-state.json
-  sdd/
-    progress.md
 ```
 
 | 文件 | 职责 |
@@ -36,8 +36,8 @@ Superpowers 是唯一工作流主体：
 | `.superpowers/tasks/<task>/task_plan.md` | 唯一正式 roadmap / implementation plan |
 | `.superpowers/tasks/<task>/findings.md` | 需求、设计、约束、调研、根因、关键决策 |
 | `.superpowers/tasks/<task>/progress.md` | 执行时间线、测试结果、失败、验证证据、下一步 |
+| `.superpowers/tasks/<task>/sdd/progress.md` | 当前任务的 SDD 分发 ledger，用于避免重复 dispatch |
 | `.superpowers/tasks/<task>/.hook-state.json` | hook 内部节流状态，不需要人类维护 |
-| `.superpowers/sdd/progress.md` | SDD 分发 ledger，只用于避免重复 dispatch |
 
 不要为新任务创建旧的 artifact-type spec/plan 目录。`task_plan.md` 就是正式实现计划，`findings.md` 就是设计/spec memory。
 
@@ -138,7 +138,7 @@ plugins/superpowers-pwf-codex/runtime/superpowers-memory/set-active-task.sh 2026
 | `PreToolUse` | Bash 前提醒使用当前 task roadmap |
 | `PermissionRequest` | 审批前提示命令应对照当前 roadmap |
 | `PostToolUse` | 低频 memory checkpoint；只提醒，不自动写文件 |
-| `PreCompact` | 压缩前提醒刷新 `task_plan.md/findings.md/progress.md` 和 SDD ledger |
+| `PreCompact` | 压缩前提醒刷新 `task_plan.md/findings.md/progress.md` 和当前任务的 SDD ledger |
 | `Stop` | 回合结束时 advisory 检查未完成 checkbox 和验证证据 |
 
 Hooks 不会自动修改 `task_plan.md`、`findings.md` 或 `progress.md`。自动写入会污染长期 memory；真正的更新应由 agent 在理解上下文后主动写入。

@@ -6,7 +6,8 @@ usage() {
 Usage: init-task.sh "Task Name" [--session SESSION_ID]
 
 Creates .superpowers/tasks/<date>-<slug>/ with task_plan.md, findings.md,
-progress.md, sets .superpowers/active_task, and optionally pins the session.
+progress.md, task-local sdd/progress.md, sets .superpowers/active_task, and
+optionally pins the session.
 EOF
 }
 
@@ -60,7 +61,7 @@ task_id="${DATE}-${slug}"
 root=".superpowers"
 task_dir="${root}/tasks/${task_id}"
 
-mkdir -p "$task_dir" "${root}/sessions" "${root}/sdd"
+mkdir -p "$task_dir" "${task_dir}/sdd" "${root}/sessions"
 
 if [ ! -f "${root}/.gitignore" ]; then
   {
@@ -85,17 +86,18 @@ copy_if_missing "${TEMPLATE_DIR}/task_plan.md" "${task_dir}/task_plan.md"
 copy_if_missing "${TEMPLATE_DIR}/findings.md" "${task_dir}/findings.md"
 copy_if_missing "${TEMPLATE_DIR}/progress.md" "${task_dir}/progress.md"
 
+if [ ! -f "${task_dir}/sdd/progress.md" ]; then
+  printf '# SDD Progress\n\nTask-local SDD dispatch ledger for %s.\n' "$task_id" > "${task_dir}/sdd/progress.md"
+fi
+
 printf '%s\n' "$task_id" > "${root}/active_task"
 if [ -n "$SESSION_ID" ]; then
   printf '%s\n' "$task_id" > "${root}/sessions/${SESSION_ID}.task"
 fi
 
-if [ ! -f "${root}/sdd/progress.md" ]; then
-  printf '# SDD Progress\n\n' > "${root}/sdd/progress.md"
-fi
-
 echo "Initialized Superpowers task: ${task_id}"
 echo "Task dir: ${task_dir}"
+echo "Task-local SDD ledger: ${task_dir}/sdd/progress.md"
 echo "Active task file: ${root}/active_task"
 if [ -n "$SESSION_ID" ]; then
   echo "Session pin: ${root}/sessions/${SESSION_ID}.task"

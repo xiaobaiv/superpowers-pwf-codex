@@ -289,14 +289,14 @@ def pre_compact(info: dict[str, Any], root: Path) -> None:
     if not info.get("active"):
         return
     task_dir, task_plan, findings, progress = task_paths(info)
-    sdd = root / ".superpowers" / "sdd" / "progress.md"
+    sdd = task_dir / "sdd" / "progress.md"
     message = "\n".join([
         "[superpowers-memory] Compact checkpoint.",
         "Before compaction, ensure:",
         f"- {rel(progress, root)} records recent actions, test results, failures, and next step.",
         f"- {rel(findings, root)} records new constraints, root causes, and decisions.",
         f"- {rel(task_plan, root)} checkbox/status reflects the true roadmap state.",
-        f"- {rel(sdd, root)} is current if SDD is active.",
+        f"- {rel(sdd, root)} is current if SDD is active for this task.",
     ])
     emit_json({"systemMessage": message})
 

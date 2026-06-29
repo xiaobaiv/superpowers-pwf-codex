@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resolve and ensure the working-tree directory SDD uses for its short-lived
+# Resolve and ensure the active task directory SDD uses for its short-lived
 # artifacts: task briefs, implementer reports, review packages, and the
 # progress ledger. Print the directory's absolute path.
 #
@@ -15,8 +15,48 @@
 # Usage: sdd-workspace
 set -euo pipefail
 
-root=$(git rev-parse --show-toplevel)
-dir="$root/.superpowers/sdd"
+root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+if [ ! -d "$root/.superpowers" ]; then
+  search_dir=$(pwd)
+  while [ "$search_dir" != "/" ]; do
+    if [ -d "$search_dir/.superpowers" ]; then
+      root="$search_dir"
+      break
+    fi
+    search_dir=$(dirname "$search_dir")
+  done
+fi
+
+task_id="${SUPERPOWERS_TASK_ID:-}"
+if [ -z "$task_id" ] && [ -n "${SUPERPOWERS_SESSION_ID:-}" ] && [ -f "$root/.superpowers/sessions/${SUPERPOWERS_SESSION_ID}.task" ]; then
+  task_id=$(tr -d '[:space:]' < "$root/.superpowers/sessions/${SUPERPOWERS_SESSION_ID}.task")
+fi
+if [ -z "$task_id" ] && [ -f "$root/.superpowers/active_task" ]; then
+  task_id=$(tr -d '[:space:]' < "$root/.superpowers/active_task")
+fi
+
+if [ -z "$task_id" ]; then
+  echo "No active Superpowers task. Set SUPERPOWERS_TASK_ID or create .superpowers/active_task." >&2
+  exit 2
+fi
+
+case "$task_id" in
+  *[!A-Za-z0-9._-]*|"")
+    echo "Invalid Superpowers task id: $task_id" >&2
+    exit 2
+    ;;
+esac
+
+task_dir="$root/.superpowers/tasks/$task_id"
+if [ ! -f "$task_dir/task_plan.md" ]; then
+  echo "Active Superpowers task does not exist or lacks task_plan.md: $task_dir" >&2
+  exit 2
+fi
+
+dir="$task_dir/sdd"
 mkdir -p "$dir"
 printf '*\n' > "$dir/.gitignore"
+if [ ! -f "$dir/progress.md" ]; then
+  printf '# SDD Progress\n\nTask-local SDD dispatch ledger for %s.\n' "$task_id" > "$dir/progress.md"
+fi
 cd "$dir" && pwd

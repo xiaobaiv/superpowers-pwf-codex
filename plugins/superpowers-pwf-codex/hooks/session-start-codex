@@ -25,7 +25,7 @@ Use .superpowers/tasks/<task>/task_plan.md as the only implementation roadmap.
 Use .superpowers/tasks/<task>/findings.md for requirements, design, research, constraints, root causes, and decisions.
 Use .superpowers/tasks/<task>/progress.md for execution history, verification evidence, failures, and next step.
 Do not create legacy artifact-type task directories for new work.
-Use .superpowers/sdd/progress.md only as the SDD dispatch ledger.
+Use .superpowers/tasks/<task>/sdd/progress.md as the task-local SDD dispatch ledger.
 EOF
 )"
 

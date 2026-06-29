@@ -250,8 +250,8 @@ controllers that lost their place have re-dispatched entire completed task
 sequences — the single most expensive failure observed. Track progress in
 a ledger file, not only in todos.
 
-- At skill start, check for a ledger:
-  `cat "$(git rev-parse --show-toplevel)/.superpowers/sdd/progress.md"`. Tasks listed there
+- At skill start, check for the active task's ledger:
+  `cat "$(git rev-parse --show-toplevel)/.superpowers/tasks/<active-task>/sdd/progress.md"`. Tasks listed there
   as complete are DONE — do not re-dispatch them; resume at the first task
   not marked complete.
 - When a task's review comes back clean, append one line to the ledger in
@@ -415,7 +415,7 @@ Done!
 
 **Persistent memory contract:**
 - Read `.superpowers/tasks/<active-task>/task_plan.md` as the only implementation roadmap.
-- Use `.superpowers/sdd/progress.md` only as the SDD dispatch ledger.
+- Use `.superpowers/tasks/<active-task>/sdd/progress.md` only as the task-local SDD dispatch ledger.
 - Record cross-task summaries, blockers, and verification evidence in `.superpowers/tasks/<active-task>/progress.md`.
 - Record new durable constraints or design decisions in `.superpowers/tasks/<active-task>/findings.md`.
 - Use `superpowers:using-git-worktrees` only when the user explicitly asks for a worktree.
